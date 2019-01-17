@@ -11,7 +11,7 @@ SDL_Renderer* renderer;
 SDL_Surface* surface;
 SDL_Texture* texture;
 
-void window_init()
+void windowInit()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -75,15 +75,10 @@ void window_init()
         exit(1);
     }
 
-    renderer_init();
+    rendererInit();
 }
 
-int sign(float x)
-{
-    return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-}
-
-void window_put_pixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
+void windowPutPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
 {
     if (x < 0 || y < 0 || x >= WINDOW_WIDTH || y >= WINDOW_HEIGHT)
         return;
@@ -92,7 +87,7 @@ void window_put_pixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
     *p = SDL_MapRGB(surface->format, r, g, b);
 }
 
-void window_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t r, uint8_t g, uint8_t b)
+void windowDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t r, uint8_t g, uint8_t b)
 {   
     int dx =  abs((int32_t) x1 - (int32_t) x0);
     int dy = -abs((int32_t) y1 - (int32_t) y0);
@@ -106,7 +101,7 @@ void window_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_
  
     while (1) 
     {
-        window_put_pixel(x0, y0, r, g, b);
+        windowPutPixel(x0, y0, r, g, b);
 
         if (x0 == x1 && y0 == y1) break;
 
@@ -126,12 +121,12 @@ void window_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_
     }
 }
 
-void window_draw(float dt)
+void windowDraw(float dt)
 {
     SDL_LockSurface(surface);
     memset(surface->pixels, 0, surface->h * surface->pitch);
 
-    renderer_draw(dt);
+    rendererDraw(dt);
 
     SDL_UnlockSurface(surface);
     SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
@@ -139,9 +134,9 @@ void window_draw(float dt)
     SDL_RenderPresent(renderer);
 }
 
-void window_shutdown()
+void windowShutdown()
 {
-    renderer_shutdown();
+    rendererShutdown();
 
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);

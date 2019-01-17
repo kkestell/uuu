@@ -8,7 +8,7 @@
 
 int main()
 {
-    window_init();
+    windowInit();
 
     uint64_t old_time = SDL_GetPerformanceCounter();
     uint64_t new_time = 0;
@@ -29,7 +29,7 @@ int main()
             (double)SDL_GetPerformanceFrequency());
         //printf("%f\n", delta_time);
 
-        window_draw(delta_time);
+        windowDraw(delta_time);
     }
 
     return 0;

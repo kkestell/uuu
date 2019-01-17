@@ -9,10 +9,11 @@
 #include "window.h"
 
 mat4 projection_matrix;
-camera_t camera;
-mesh_t mesh;
+mat4 view_matrix;
+Camera camera;
+Mesh mesh;
 
-void renderer_init()
+void rendererInit()
 {
     camera.position[0] = 0;
     camera.position[1] = 0;
@@ -26,8 +27,8 @@ void renderer_init()
     mesh.vertices = (vec3*)malloc(sizeof(vec3) * mesh.num_vertices);
 
     mesh.num_triangles = 2;
-    mesh.triangles = (triangle_t*)malloc(
-        sizeof(triangle_t) * mesh.num_triangles
+    mesh.triangles = (Triangle*)malloc(
+        sizeof(Triangle) * mesh.num_triangles
     );
 
     // bl
@@ -88,25 +89,20 @@ void project(vec3 v, mat4 m)
     glm_vec3(p, v);
 }
 
-void renderer_draw_mesh(mesh_t* mesh, camera_t* camera)
+void rendererDrawMesh(float dt, Mesh* mesh, Camera* camera)
 {
     // model matrix
 
-    /*
-    mesh->rotation = mesh->rotation + 0.1f * (dt * (1.0f / FRAMERATE));
+    mesh->rotation = mesh->rotation + 0.05f * (dt * (1.0f / FRAMERATE));
     if(mesh->rotation > M_PI * 2)
         mesh->rotation = 0;
-    */
 
     mat4 model_matrix;
     glm_mat4_identity(model_matrix);
-
-    // view matrix
-
-    mat4 view_matrix;
-    glm_mat4_identity(view_matrix);
-    glm_lookat(camera->position, camera->target, GLM_YUP, view_matrix);
-
+    
+    vec3 angle = { 0.3f, 1, 0.5f };
+    glm_rotate(model_matrix, mesh->rotation, angle);
+    
     // transformation matrix
 
     mat4 transformation_matrix;
@@ -137,22 +133,25 @@ void renderer_draw_mesh(mesh_t* mesh, camera_t* camera)
         glm_vec3_copy(mesh->vertices[mesh->triangles[i].v3], v3);
         project(v3, transformation_matrix);
 
-        window_draw_line(v1[0], v1[1], v2[0], v2[1], 255, 255, 255);
-        window_draw_line(v2[0], v2[1], v3[0], v3[1], 255, 255, 255);
-        window_draw_line(v3[0], v3[1], v1[0], v1[1], 255, 255, 255);
+        windowDrawLine(v1[0], v1[1], v2[0], v2[1], 255, 255, 255);
+        windowDrawLine(v2[0], v2[1], v3[0], v3[1], 255, 255, 255);
+        windowDrawLine(v3[0], v3[1], v1[0], v1[1], 255, 255, 255);
 
-        window_put_pixel(v1[0], v1[1], 255, 0, 0);
-        window_put_pixel(v2[0], v2[1], 255, 0, 0);
-        window_put_pixel(v3[0], v3[1], 255, 0, 0);
+        windowPutPixel(v1[0], v1[1], 255, 0, 0);
+        windowPutPixel(v2[0], v2[1], 255, 0, 0);
+        windowPutPixel(v3[0], v3[1], 255, 0, 0);
     }
 }
 
-void renderer_draw(float dt)
+void rendererDraw(float dt)
 {
-    renderer_draw_mesh(&mesh, &camera);
+    glm_mat4_identity(view_matrix);
+    glm_lookat(camera.position, camera.target, GLM_YUP, view_matrix);
+
+    rendererDrawMesh(dt, &mesh, &camera);
 }
 
-void renderer_shutdown()
+void rendererShutdown()
 {
     free(mesh.vertices);
 }

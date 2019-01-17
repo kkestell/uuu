@@ -6,24 +6,24 @@
 typedef struct
 {
     vec3 position, target;
-} camera_t;
+} Camera;
 
 typedef struct
 {
     int v1, v2, v3;
-} triangle_t;
+} Triangle;
 
 typedef struct
 {
     vec3* vertices;
     int num_vertices;
-    triangle_t* triangles;
+    Triangle* triangles;
     int num_triangles;
     float rotation;
-} mesh_t;
+} Mesh;
 
-void renderer_init();
-void renderer_draw(float dt);
-void renderer_shutdown();
+void rendererInit();
+void rendererDraw(float dt);
+void rendererShutdown();
 
 #endif
