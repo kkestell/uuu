@@ -7,151 +7,117 @@
 #include "config.h"
 #include "renderer.h"
 #include "window.h"
+#include "mesh.h"
+#include "math.h"
 
-mat4 projection_matrix;
-mat4 view_matrix;
+mat4 projectionMatrix;
+mat4 viewMatrix;
+vec3 forward;
 Camera camera;
-Mesh mesh;
+Mesh* mesh;
+
+float rot = 0;
 
 void rendererInit()
 {
-    camera.position[0] = 0;
-    camera.position[1] = 0;
-    camera.position[2] = 8;
+    camera.position[0] =  0;
+    camera.position[1] =  0;
+    camera.position[2] = -8;
 
-    camera.target[0] = 0;
-    camera.target[1] = 0;
-    camera.target[2] = 0;
+    glm_quat_identity(camera.orientation);
 
-    mesh.num_vertices = 4;
-    mesh.vertices = (vec3*)malloc(sizeof(vec3) * mesh.num_vertices);
-
-    mesh.num_triangles = 2;
-    mesh.triangles = (Triangle*)malloc(
-        sizeof(Triangle) * mesh.num_triangles
-    );
-
-    // bl
-    mesh.vertices[0][0] = -1;
-    mesh.vertices[0][1] = -1;
-    mesh.vertices[0][2] =  0;
-
-    // tl
-    mesh.vertices[1][0] = -1;
-    mesh.vertices[1][1] =  1;
-    mesh.vertices[1][2] =  0;
-    
-    // tr
-    mesh.vertices[2][0] =  1;
-    mesh.vertices[2][1] =  1;
-    mesh.vertices[2][2] =  0;
-    
-    // br
-    mesh.vertices[3][0] =  1;
-    mesh.vertices[3][1] = -1;
-    mesh.vertices[3][2] =  0;
-
-    // bl, tl, tr
-    mesh.triangles[0].v1 = 0;
-    mesh.triangles[0].v2 = 1;
-    mesh.triangles[0].v3 = 2;
-
-    // tr, br, bl
-    mesh.triangles[1].v1 = 2;
-    mesh.triangles[1].v2 = 3;
-    mesh.triangles[1].v3 = 0;
+    mesh = meshLoad("bin/assets/mesh/torus.obj");
 
     // projection matrix
 
-    glm_mat4_identity(projection_matrix);
+    glm_mat4_identity(projectionMatrix);
 
     glm_perspective(
         glm_rad(60),
         (float)FRAMEBUFFER_WIDTH / (float)FRAMEBUFFER_HEIGHT,
         0.1f,
         100,
-        projection_matrix
+        projectionMatrix
     );
 }
 
-void project(vec3 v, mat4 m)
-{
-    vec4 p;
-    glm_vec4(v, 1, p);
-
-    glm_mat4_mulv(m, p, p);
-    
-    glm_vec4_divs(p, p[3], p);
-
-    p[0] =  p[0] * FRAMEBUFFER_WIDTH  + FRAMEBUFFER_WIDTH  / 2;
-    p[1] = -p[1] * FRAMEBUFFER_HEIGHT + FRAMEBUFFER_HEIGHT / 2;
-
-    glm_vec3(p, v);
-}
-
-void rendererDrawMesh(float dt, Mesh* mesh, Camera* camera)
+void rendererDrawMesh(Mesh* mesh, Camera* camera)
 {
     // model matrix
 
-    mesh->rotation = mesh->rotation + 0.05f * (dt * (1.0f / FRAMERATE));
-    if(mesh->rotation > M_PI * 2)
-        mesh->rotation = 0;
-
-    mat4 model_matrix;
-    glm_mat4_identity(model_matrix);
+    mat4 modelMatrix;
+    glm_mat4_identity(modelMatrix);
     
-    vec3 angle = { 0.3f, 1, 0.5f };
-    glm_rotate(model_matrix, mesh->rotation, angle);
+    glm_translate(modelMatrix, mesh->position);
+    glm_quat_rotate(modelMatrix, mesh->orientation, modelMatrix);
+
+    // model view matrix
+
+    mat4 modelViewMatrix;
+    glm_mat4_mul(viewMatrix, modelMatrix, modelViewMatrix);
     
     // transformation matrix
 
-    mat4 transformation_matrix;
-    glm_mat4_identity(transformation_matrix);
-    glm_mat4_mulN(
-        (mat4 *[]) {
-            &projection_matrix,
-            &view_matrix,
-            &model_matrix
-        },
-        3,
-        transformation_matrix
-    );
+    mat4 transformationMatrix;
+    glm_mat4_mul(projectionMatrix, modelViewMatrix, transformationMatrix);
 
-    // render
+    // render faces
     
-    for (int i = 0; i < mesh->num_triangles; i++)
+    for (int i = 0; i < mesh->numFaces; i++)
     {
+        // backface culling
+
+        vec3 normal;
+        glm_vec3_copy(mesh->faces[i].normal, normal);
+        glm_mat4_project(normal, modelMatrix, normal);
+
+        if (glm_vec3_dot(forward, normal) <= 0) continue;
+
+        // render face
+
         vec3 v1;
-        glm_vec3_copy(mesh->vertices[mesh->triangles[i].v1], v1);
-        project(v1, transformation_matrix);
+        glm_vec3_copy(mesh->vertices[mesh->faces[i].v1], v1);
+        glm_mat4_project(v1, transformationMatrix, v1);
         
         vec3 v2;
-        glm_vec3_copy(mesh->vertices[mesh->triangles[i].v2], v2);
-        project(v2, transformation_matrix);
+        glm_vec3_copy(mesh->vertices[mesh->faces[i].v2], v2);
+        glm_mat4_project(v2, transformationMatrix, v2);
         
         vec3 v3;
-        glm_vec3_copy(mesh->vertices[mesh->triangles[i].v3], v3);
-        project(v3, transformation_matrix);
+        glm_vec3_copy(mesh->vertices[mesh->faces[i].v3], v3);
+        glm_mat4_project(v3, transformationMatrix, v3);
 
         windowDrawLine(v1[0], v1[1], v2[0], v2[1], 255, 255, 255);
         windowDrawLine(v2[0], v2[1], v3[0], v3[1], 255, 255, 255);
         windowDrawLine(v3[0], v3[1], v1[0], v1[1], 255, 255, 255);
-
-        windowPutPixel(v1[0], v1[1], 255, 0, 0);
-        windowPutPixel(v2[0], v2[1], 255, 0, 0);
-        windowPutPixel(v3[0], v3[1], 255, 0, 0);
     }
 }
 
-void rendererDraw(float dt)
+void rendererDraw(float deltaTime)
 {
-    glm_mat4_identity(view_matrix);
-    glm_lookat(camera.position, camera.target, GLM_YUP, view_matrix);
+    // view matrix
 
-    rendererDrawMesh(dt, &mesh, &camera);
+    glm_mat4_identity(viewMatrix);
+    glm_translate(viewMatrix, camera.position);
+    glm_quat_rotate(viewMatrix, camera.orientation, viewMatrix);
+
+    // calculate forward vector
+
+    glm_quat_forward(camera.orientation, forward);
+
+    // rotate mesh
+
+    rot = rot + 0.03f * (deltaTime * (1.0f / FRAMERATE));
+    if(rot > M_PI * 2)
+        rot = 0;
+
+    glm_quatv(mesh->orientation, rot, GLM_YUP);
+
+    // render mesh
+
+    rendererDrawMesh(mesh, &camera);
 }
 
 void rendererShutdown()
 {
-    free(mesh.vertices);
 }

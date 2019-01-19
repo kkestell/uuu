@@ -121,12 +121,12 @@ void windowDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t 
     }
 }
 
-void windowDraw(float dt)
+void windowDraw(float deltaTime)
 {
     SDL_LockSurface(surface);
     memset(surface->pixels, 0, surface->h * surface->pitch);
 
-    rendererDraw(dt);
+    rendererDraw(deltaTime);
 
     SDL_UnlockSurface(surface);
     SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);

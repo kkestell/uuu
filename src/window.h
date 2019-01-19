@@ -9,14 +9,6 @@ void windowDraw(float deltaTime);
 
 void windowShutdown();
 
-void windowPutPixel(
-    uint32_t x,
-    uint32_t y,
-    uint8_t r,
-    uint8_t g,
-    uint8_t b
-);
-
 void windowDrawLine(
     uint32_t x0,
     uint32_t y0,
