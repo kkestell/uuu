@@ -21,12 +21,12 @@ float rot = 0;
 void rendererInit()
 {
     camera.position[0] =  0;
-    camera.position[1] =  0;
-    camera.position[2] = -8;
+    camera.position[1] = -1;
+    camera.position[2] = -15;
 
     glm_quat_identity(camera.orientation);
 
-    mesh = meshLoad("bin/assets/mesh/torus.obj");
+    mesh = meshLoad("bin/assets/mesh/teapot.obj");
 
     // projection matrix
 
@@ -108,7 +108,7 @@ void rendererDraw(float deltaTime)
     // rotate mesh
 
     rot = rot + 0.03f * (deltaTime * (1.0f / FRAMERATE));
-    if(rot > M_PI * 2)
+    if(rot > GLM_PI * 2)
         rot = 0;
 
     glm_quatv(mesh->orientation, rot, GLM_YUP);
