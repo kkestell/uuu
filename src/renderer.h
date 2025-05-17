@@ -11,8 +11,8 @@ typedef struct
     versor orientation;
 } Camera;
 
-void rendererInit();
-void rendererDraw(float deltaTime);
-void rendererShutdown();
+void renderer_init();
+void renderer_draw(float delta_time);
+void renderer_shutdown();
 
 #endif

@@ -3,6 +3,6 @@
 
 #include <stdlib.h>
 
-const char* getFileData(size_t* len, const char* filename);
+const char *get_file_data(size_t *len, const char *filename);
 
 #endif

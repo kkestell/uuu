@@ -5,8 +5,12 @@
 ## Getting Started
 
 ```
-$ make
-$ bin/uuu
+mkdir build
+cd build
+cmake ..
+make
+cd ..
+./build/bin/uuu assets/mesh/teapot.obj
 ```
 
 ## Dependencies
@@ -14,12 +18,11 @@ $ bin/uuu
 ### Arch
 
 ```
-$ sudo pacman -S sdl2 assimp
-$ yay -S cglm
+yay -S cglm sdl2 assimp
 ```
 
 ### macOS
 
 ```
-$ brew install sdl2 cglm assimp
+brew install sdl2 cglm assimp
 ```

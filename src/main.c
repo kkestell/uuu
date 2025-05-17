@@ -8,20 +8,19 @@
 #include "window.h"
 #include "platform.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    /*
-    size_t size;
-    const char* data = getFileData(&size, "bin/assets/mesh/cube.obj");
-    for (int i = 0; i < size; i++)
-        printf("%c", data[i]);
-    */
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: %s <mesh_filename>\n", argv[0]);
+        exit(1);
+    }
 
-    windowInit();
+    window_init(argv[1]);
 
-    uint64_t oldTime = SDL_GetPerformanceCounter();
-    uint64_t newTime = 0;
-    float deltaTime = 0;
+    uint64_t old_time = 0;
+    uint64_t new_time = 0;
+    float delta_time = 0;
 
     while (true)
     {
@@ -31,17 +30,16 @@ int main()
             if (event.type == SDL_QUIT) break;
         }
 
-        oldTime = newTime;
+        old_time = new_time;
 
         do
         {
-            newTime = SDL_GetPerformanceCounter();
-            deltaTime = (float)((newTime - oldTime) * 1000 / 
-                (double)SDL_GetPerformanceFrequency());
+            new_time = SDL_GetPerformanceCounter();
+            delta_time = (float)(((double)(new_time - old_time) * 1000.0) / (double)SDL_GetPerformanceFrequency());
         }
-        while (deltaTime <= 1.0f / FRAMERATE * 1000);
-    
-        windowDraw(deltaTime);
+        while (delta_time <= 1.0f / FRAMERATE * 1000);
+
+        window_draw(delta_time);
     }
 
     return 0;

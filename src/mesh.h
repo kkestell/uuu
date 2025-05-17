@@ -16,19 +16,20 @@ typedef struct
     vec3 position;
     versor orientation;
 
-    vec3* vertices;
-    uint32_t numVertices;
+    vec3 *vertices;
+    uint32_t num_vertices;
 
-    vec3* normals;
-    uint32_t numNormals;
+    vec3 *normals;
+    uint32_t num_normals;
 
-    vec3* uvs;
-    uint32_t numUvs;
+    vec3 *uvs;
+    uint32_t num_uvs;
 
-    Triangle* faces;
-    uint32_t numFaces;
+    Triangle *faces;
+    uint32_t num_faces;
 } Mesh;
 
-Mesh* meshLoad(const char *filename);
+Mesh *mesh_load(const char *filename);
+void mesh_free(Mesh *mesh);
 
 #endif

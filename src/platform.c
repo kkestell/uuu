@@ -7,17 +7,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-static const char* mmapFile(size_t* len, const char* filename)
+static const char *mmap_file(size_t *len, const char *filename)
 {
-    FILE* f;
-    long file_size;
     struct stat sb;
-    char* p;
-    int fd;
 
-    (*len) = 0;
+    *len = 0;
 
-    f = fopen(filename, "r");
+    FILE *f = fopen(filename, "r");
 
     if (f == NULL)
     {
@@ -31,7 +27,7 @@ static const char* mmapFile(size_t* len, const char* filename)
         exit(1);
     }
 
-    file_size = ftell(f);
+    long file_size = ftell(f);
 
     if (file_size == -1)
     {
@@ -45,7 +41,7 @@ static const char* mmapFile(size_t* len, const char* filename)
         exit(1);
     }
 
-    fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_RDONLY);
     
     if (fd == -1)
     {
@@ -65,7 +61,7 @@ static const char* mmapFile(size_t* len, const char* filename)
         exit(1);
     }
 
-    p = (char*)mmap(0, (size_t)file_size, PROT_READ, MAP_SHARED, fd, 0);
+    char *p = (char *) mmap(0, (size_t) file_size, PROT_READ, MAP_SHARED, fd, 0);
 
     if (p == MAP_FAILED)
     {
@@ -84,12 +80,12 @@ static const char* mmapFile(size_t* len, const char* filename)
     return p;
 }
 
-const char* getFileData(size_t* len, const char* filename)
+const char *get_file_data(size_t *len, const char *filename)
 {
     size_t data_len = 0;
     const char* data = NULL;
 
-    data = mmapFile(&data_len, filename);
+    data = mmap_file(&data_len, filename);
 
     *len = data_len;
     return data;

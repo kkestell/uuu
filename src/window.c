@@ -6,12 +6,12 @@
 #include "config.h"
 #include "renderer.h"
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-SDL_Surface* surface;
-SDL_Texture* texture;
+SDL_Window   *window;
+SDL_Renderer *renderer;
+SDL_Surface  *surface;
+SDL_Texture  *texture;
 
-void windowInit()
+void window_init(const char *mesh_filename)
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -75,19 +75,19 @@ void windowInit()
         exit(1);
     }
 
-    rendererInit();
+    renderer_init(mesh_filename);
 }
 
-void windowPutPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
+void window_put_pixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b)
 {
-    if (x < 0 || y < 0 || x >= WINDOW_WIDTH || y >= WINDOW_HEIGHT)
+    if (x >= WINDOW_WIDTH || y >= WINDOW_HEIGHT)
         return;
     
-    uint32_t* p = (uint32_t*)surface->pixels + y * surface->w + x;
+    uint32_t *p = (uint32_t*)surface->pixels + y * surface->w + x;
     *p = SDL_MapRGB(surface->format, r, g, b);
 }
 
-void windowDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t r, uint8_t g, uint8_t b)
+void window_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t r, uint8_t g, uint8_t b)
 {   
     int dx =  abs((int32_t) x1 - (int32_t) x0);
     int dy = -abs((int32_t) y1 - (int32_t) y0);
@@ -101,7 +101,7 @@ void windowDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t 
  
     while (1) 
     {
-        windowPutPixel(x0, y0, r, g, b);
+        window_put_pixel(x0, y0, r, g, b);
 
         if (x0 == x1 && y0 == y1) break;
 
@@ -121,12 +121,12 @@ void windowDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t 
     }
 }
 
-void windowDraw(float deltaTime)
+void window_draw(float deltaTime)
 {
     SDL_LockSurface(surface);
     memset(surface->pixels, 0, surface->h * surface->pitch);
 
-    rendererDraw(deltaTime);
+    renderer_draw(deltaTime);
 
     SDL_UnlockSurface(surface);
     SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
@@ -134,11 +134,12 @@ void windowDraw(float deltaTime)
     SDL_RenderPresent(renderer);
 }
 
-void windowShutdown()
+void window_shutdown()
 {
-    rendererShutdown();
+    renderer_shutdown();
 
     SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 }
